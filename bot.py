@@ -76,7 +76,7 @@ def print_info_box(social_media_usernames):
         print(color + f'| {social}: {username} |')
     print(Fore.WHITE + Style.BRIGHT + '+' + '-' * (box_width - 2) + '+')
 async def send_request():
-    url = "https://crystalton.ru/api/register"
+    url = "https://crystalton.ru/api/user"
     
     # قراءة initDataStr من الملف
     init_data_str = get_init_data_from_file("data.txt")
@@ -85,13 +85,7 @@ async def send_request():
         return None
     
     # إعداد البيانات
-    payload = {
-       
-        "initDataStr": init_data_str,        
-        "version": "7.10",
-        "platform": "ios"
-    }
-
+    
     # إعداد الرؤوس
     headers = {
         'User-Agent': get_user_agent(),
@@ -99,7 +93,7 @@ async def send_request():
         'sec-ch-ua': "\"Not-A.Brand\";v=\"99\", \"Chromium\";v=\"124\"",
         'Accept-Language': "en",
         'sec-ch-ua-mobile': "?1",
-        'Authorization': "Bearer null",
+        'Authorization': f"Bearer {init_data_str}",
         'Content-Type': "application/json;charset=utf-8",
         'sec-ch-ua-platform': "\"Android\"",
         'Origin': "https://crystalton.ru",
@@ -111,12 +105,12 @@ async def send_request():
     }
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=payload, headers=headers) as response:
+        async with session.get(url,headers=headers) as response:
             if response.status == 200:
                 data = await response.json()
                 
                 # استخراج التوكين
-                token = data.get("token")
+                token = init_data_str
                 first_name = data.get("user", {}).get("first_name", "Unknown")
                 print(f"{Fore.GREEN}[{get_current_datetime()}] Token: {token}")
                 print(f"{Fore.GREEN}[{get_current_datetime()}] First Name: {first_name}")
@@ -146,7 +140,7 @@ async def send_ads_requests(token):
     }
 
     while True:  # تنفيذ الدالة بشكل متكرر
-        for ads_id in range(1, 4):  # إرسال 3 طلبات بقيم ads_id مختلفة
+        for ads_id in range(1, 6):  # إرسال 3 طلبات بقيم ads_id مختلفة
             payload = {"ads_id": ads_id}
             async with aiohttp.ClientSession() as session:
                 async with session.post(url, json=payload, headers=headers) as response:
@@ -287,7 +281,7 @@ async def send_ton(token):
 	                    	print(f"{Fore.MAGENTA}[{get_current_datetime()}] daily login ton: {error_message:}")	                    
 async def send_click_request(token):
     url = "https://crystalton.ru/api/clicks"
-    payload = {"clicks": 5}
+    payload = {"clicks": 1}
 
     headers = {
         'User-Agent': get_user_agent(),
@@ -407,3 +401,4 @@ async def main():
         ) 	    
 # تشغيل البرنامج
 asyncio.run(main())
+	
