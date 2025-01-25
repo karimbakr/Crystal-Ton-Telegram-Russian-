@@ -8,6 +8,8 @@ import os
 import importlib.util 
 import  subprocess
 import sys
+
+import random
 # تهيئة مكتبة colorama
 libraries = ["aiohttp","colorama",  "pyfiglet","asyncio"]
 
@@ -81,7 +83,7 @@ async def send_request():
     # قراءة initDataStr من الملف
     init_data_str = get_init_data_from_file("data.txt")
     if not init_data_str:
-        print(f"{Fore.RED}[{get_current_datetime()}] No initDataStr provided. Exiting...")
+        print(f"{Fore.RED}[{get_current_datetime()}] Your Token is wrong put your token not queryid !")
         return None
     
     # إعداد البيانات
@@ -121,7 +123,7 @@ async def send_request():
 
 # دالة لإرسال الطلبات للإعلانات باستخدام التوكين
 async def send_ads_requests(token):
-    url = "https://crystalton.ru/api/ads"
+    url = "https://crystalton.ru/api/ads/view"
     headers = {
         'User-Agent': get_user_agent(),
         'Accept': "application/json",
@@ -140,7 +142,7 @@ async def send_ads_requests(token):
     }
 
     while True:  # تنفيذ الدالة بشكل متكرر
-        for ads_id in range(1, 6):  # إرسال 3 طلبات بقيم ads_id مختلفة
+        for ads_id in range(1, 10):  # إرسال 3 طلبات بقيم ads_id مختلفة
             payload = {"ads_id": ads_id}
             async with aiohttp.ClientSession() as session:
                 async with session.post(url, json=payload, headers=headers) as response:
@@ -163,12 +165,50 @@ async def send_ads_requests(token):
         print(f"{Fore.GREEN}[{get_current_datetime()}] Waiting for 4 hours before repeating Ad...")
         await asyncio.sleep(4 * 60 * 60)  # الانتظار لمدة 4 ساعات
 
+
+
+async def send_spaceship(token):
+    url = "https://crystalton.ru/api/spaceship"
+    headers = {
+        'User-Agent': get_user_agent(),
+        'Accept': "application/json",
+        'Content-Type': "application/json",
+        'sec-ch-ua': "\"Not-A.Brand\";v=\"99\", \"Chromium\";v=\"124\"",
+        'Accept-Language': "en",
+        'sec-ch-ua-mobile': "?1",
+        'Authorization': f"Bearer {token}",
+        'sec-ch-ua-platform': "\"Android\"",
+        'Origin': "https://crystalton.ru",
+        'Sec-Fetch-Site': "same-origin",
+        'Sec-Fetch-Mode': "cors",
+        'Sec-Fetch-Dest': "empty",
+        'Referer': "https://crystalton.ru/game"
+    }
+
+    async with aiohttp.ClientSession() as session:
+        while True:  # يعمل بشكل مستمر كل ساعة
+            for _ in range(5):  # إرسال الطلب 5 مرات
+                random_score = random.randint(5000, 20000)  # توليد رقم عشوائي بين 5000 و20000
+                payload = {"scores": random_score}
+                
+                
+                async with session.post(url, data=json.dumps(payload), headers=headers) as response:
+                    if response.status == 200:                                      
+                        print(f"{Fore.MAGENTA}[{get_current_datetime()}]Playing Space... Scores earned: {random_score}")                        
+                    else:
+                        print("Not ticket to play")
+                
+                await asyncio.sleep(60)  # الانتظار دقيقة بين كل طلب
+
+            await asyncio.sleep(3600)
+# استدعاء الدالة
+
 def get_user_agent():
     return "Mozilla/5.0 (Linux; Android 12; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.6668.100 Mobile Safari/537.36 Telegram-Android/11.2.2 (Xiaomi M1908C3JGG; Android 12; SDK 31; AVERAGE)"
 
 # دالة لعمل Spin بشكل دوري كل 12 ساعة
 async def spin_fortune_wheel(token):
-    url = "https://crystalton.ru/api/fortune_wheel/spin"
+    url = "https://crystalton.ru/api/fortune_wheel"
     payload = {}
 
     headers = {
@@ -397,8 +437,8 @@ async def main():
             send_ads_requests(token),
             spin_fortune_wheel(token),
             send_click_request(token),
+            send_spaceship(token)
             
         ) 	    
 # تشغيل البرنامج
 asyncio.run(main())
-	
